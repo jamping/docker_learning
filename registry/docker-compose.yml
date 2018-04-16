@@ -1,0 +1,7 @@
+registry:
+  restart: always
+  image: registry
+  ports:
+    - 5000:5000
+  volumes:
+    - /home/jjp/docker:/var/lib/registry
