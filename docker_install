@@ -109,8 +109,17 @@ vi /etc/docker/daemon.json
   "insecure-registries":["192.168.0.117:5000"]
 }
 
-systemctl daemon-reload
-systemctl restart docker
+开放管理端口映射
+
+管理端口在 /lib/systemd/system/docker.service 文件中
+cp /lib/systemd/system/docker.service /etc/systemd/system
+vi /etc/systemd/system/docker.service
+
+将其中第11行的 ExecStart=/usr/bin/dockerd 替换为：
+ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock -H tcp://0.0.0.0:7654
+（此处默认2375为主管理端口，unix:///var/run/docker.sock用于本地管理，7654是备用的端口）
+
+systemctl daemon-reload && systemctl restart docker
 
 linux上/etc/docker/daemon.json一个完整的配置示例
 

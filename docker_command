@@ -1,0 +1,117 @@
+1) registry
+docker run -d -p 5000:5000 \
+    --restart=always \
+    --name registry \
+    -v /home/user/registry-conf/config.yml:/etc/docker/registry/config.yml \
+    -v /opt/data/registry:/var/lib/registry \
+    registry
+
+2) OS
+docker run -it busybox
+
+docker run -it alphine
+
+docker run -it debain/ubuntu/centos bash
+
+3) Web
+docker run -d --name httpdweb -p 80:80 httpd
+docker run -d --name nginxweb -p 80:80 -v /data/html:/usr/share/nginx/html nginx
+docker run -d -p 80:80 -p 3306:3306 tutum/lamp
+
+4) wordpress
+docker-compose.yml
+
+wordpress:
+  image: wordpress
+  links:
+    - db:mysql
+  ports:
+    - 8080:80
+
+db:
+  imgae: mariadb
+  environment:
+    MYSQL_ROOT_PASSWORD:wbgsnmm
+
+and run:
+docker-compose up
+
+5) jenkins
+docker run - p 8080:8080 -p 50000:50000 -v /your/home:/var/jenkins_home jenkins
+
+6) Getlab
+docker run --detach \
+  --hostname gitlab.example.com \
+  --publish 443:443 --publish 80:80 --publish 23:23 \
+  --name gitlab \
+  --restart always \
+  --volume /srv/gitlab/config:/etc/gitlab \
+  --volume /srv/gitlab/logs:/var/log/gitlab \
+  --volume /srv/gitlab/data:/var/opt/gitlab \
+  gitlab/gitlab-ce
+
+7) database
+docker run --name jjp-mysql -e MYSQL_ROOT_PASSWORD=wbgsnmm -d mysql
+docker run --name jjp-mongo -d mongo
+docker run -it --link jjp-mongo:db --entrypoint mongo mongo --host db
+docker run --name jjp-redis -d redis
+docker run --name jjp-memcached -d memcached
+docker run --name jjp-couchdb -d couchdb
+docker run --name jjp-cassandra -d cassandra
+
+8) seagull
+docker run -d -p 10086:10086 -v /var/run/docker.sock:/var/run/docker.sock tobegit3hub/seagull
+
+9) tools
+gcc
+docker run --rm -v "$(pwd)":/usr/src/myapp -w /usr/src/myapp gcc gcc -o myapp main.c
+
+llvm,clang
+java
+docker run --rm -v "$(pwd)":/usr/src/javaapp -w /usr/src/javaapp java javac HelloWorld.java
+python
+docker run --rm -v "$(pwd)":/usr/src/myapp -w /usr/src/myapp python python yourcode.py
+pypy
+docker run --rm -v "$(pwd)":/usr/src/myapp -w /usr/src/myapp pypy pypy yourcode.py
+node.js
+docker run --rm -v "$(pwd)":/usr/src/myapp -w /usr/src/myapp node node yourcode.js
+go
+docker run --rm -v "$(pwd)":/usr/src/myapp -w /usr/src/myapp golang go build -v /usr/src/myapp
+
+beego
+a.go get github.com/astaxie/beego
+
+b.create the file hello.go
+
+package main
+import "github.com/astaxie/beego"
+
+func main() {
+	beego.Run()
+}
+
+c.go build -o hello hello.go
+./hello
+
+gogs
+docker run -d --name gogs \
+  -p 8300:3000 -p 8322:22 \
+  -v /srv/lxc/gogs/data:/data gogs/gogs
+
+php
+docker run --rm -v "$(pwd)":/usr/src/myapp -w /usr/src/myapp php php yourcode.php
+
+ruby
+docker run --rm -v "$(pwd)":/usr/src/myapp -w /usr/src/myapp ruby ruby yourcode.rb
+
+jruby
+docker run --rm -v "$(pwd)":/usr/src/myapp -w /usr/src/myapp jruby jruby yourcode.rb
+
+purl
+docker run --rm -v "$(pwd)":/usr/src/myapp -w /usr/src/myapp perl perl yourcode.pl
+
+r-base
+docker run --rm -v "$(pwd)":/home/docker -w /home/docker -u docker r-base R CMD check .
+
+erlang
+docker run --rm -v "$(pwd)":/usr/src/myapp -w /usr/src/myapp erlang escript yourcode.erl

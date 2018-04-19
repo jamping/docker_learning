@@ -14,17 +14,81 @@ get cluster id
 docker run --rm swarm create
 272485bf8b88fa86a632d4e0d1b2d1aa
 
-create cluster node
+create cluster node at each node
+
+docker run -d swarm join --addr=192.168.0.201:2375 token://272485bf8b88fa86a632d4e0d1b2d1aa
 docker run -d swarm join --addr=192.168.0.117:2375 token://272485bf8b88fa86a632d4e0d1b2d1aa
 docker run -d swarm join --addr=192.168.0.110:2375 token://272485bf8b88fa86a632d4e0d1b2d1aa
 docker run -d swarm join --addr=192.168.0.119:2375 token://272485bf8b88fa86a632d4e0d1b2d1aa
 
-create manage node
+create manage node(192.168.0.201)
 docker run -d -p 12375:2375 swarm manage token://272485bf8b88fa86a632d4e0d1b2d1aa
 
 get cluster list
 docker run --rm swarm list token://272485bf8b88fa86a632d4e0d1b2d1aa
 
-docker -H 192.168.0.117:12375 info
+docker -H 192.168.0.201:12375 info
 
-docker -H 192.168.0.117:12375 run -d ubuntu ping 127.0.0.1
+docker -H 192.168.0.201:12375 run -d ubuntu ping 127.0.0.1
+
+firewall-cmd --add-port=12375/tcp --permanent
+firewall-cmd --add-port=2375/tcp --permanent
+firewall-cmd --reload
+
+docker rm -f $(docker ps -qa)
+
+3) docker swarm
+
+run at each node:
+
+firewall-cmd --permanent --add-port=2375/tcp
+firewall-cmd --permanent --add-port=2376/tcp
+firewall-cmd --permanent --add-port=2377/tcp
+firewall-cmd --permanent --add-port=7654/tcp
+firewall-cmd --permanent --add-port=7946/tcp
+firewall-cmd --permanent --add-port=7946/udp
+firewall-cmd --permanent --add-port=4789/udp
+firewall-cmd --reload
+firewall-cmd --list-all
+
+开放管理端口映射
+
+管理端口在 /lib/systemd/system/docker.service 文件中
+cp /lib/systemd/system/docker.service /etc/systemd/system
+vi /etc/systemd/system/docker.service
+
+将其中第11行的 ExecStart=/usr/bin/dockerd 替换为：
+ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock -H tcp://0.0.0.0:7654
+（此处默认2375为主管理端口，unix:///var/run/docker.sock用于本地管理，7654是备用的端口）
+
+systemctl daemon-reload && service docker restart
+
+run at manager node:
+docker swarm init --advertise-addr 192.168.0.201
+
+run at each other node:
+docker swarm join --token SWMTKN-1-2vn6ufx6wtlozdu6ytc0e7m5wskygl1fm35neq1bncg1ifmwur-3yzppba9g5d72j3wxj9wlylbg 192.168.0.201:2377
+
+run at manager node:
+docker node ls
+docker service create -p 80:80 --name webserver --replicas 5 httpd
+
+docker service ls
+docker service ps webserver
+
+浏览器访问 http://192.168.100.201、http://192.168.100.117 、http://192.168.100.110 或 http://192.168.100.119，结果均为：It works!
+
+安装 Portainer
+
+在manager(192.168.100.201)节点执行：
+
+$ docker service create \
+--name portainer \
+--publish 9000:9000 \
+--constraint 'node.role == manager' \
+--mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock \
+portainer/portainer \
+-H unix:///var/run/docker.sock \
+--swarm
+
+访问 http://192.168.100.201:9000 设定 admin 后即可登录Portainer。
