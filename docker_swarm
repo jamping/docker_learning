@@ -61,7 +61,7 @@ vi /etc/systemd/system/docker.service
 ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock -H tcp://0.0.0.0:7654
 （此处默认2375为主管理端口，unix:///var/run/docker.sock用于本地管理，7654是备用的端口）
 
-systemctl daemon-reload && service docker restart
+systemctl daemon-reload && systemctl restart docker
 
 run at manager node:
 docker swarm init --advertise-addr 192.168.0.201
@@ -92,3 +92,4 @@ portainer/portainer \
 --swarm
 
 访问 http://192.168.100.201:9000 设定 admin 后即可登录Portainer。
+pass:ptWbgsnmm1@#

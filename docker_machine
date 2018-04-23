@@ -32,3 +32,19 @@ Install Machine directly
     $ docker-machine version
     docker-machine version 0.14.0, build 9371605
 
+docker-machine <command> -h
+
+docker-machine active [args...]
+docker-machine config [options] [arg...]
+docker-machine create [options] [arg...]
+
+docker-machine create -d virtualbox \
+  --engine-storage-driver overlay \
+  --engine-label name=testmachine \
+  --engine-label year=2018 \
+  --engine-opt dns=8.8.8.8 \
+  --engine-env HTTP_PROXY=http://proxy.com:3128 \
+  --engine-insecure-registry registry.private.com \
+  mydockermachine
+
+docker-machine env/inspect/ip/kill/ls [options] [arg...]

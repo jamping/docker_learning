@@ -39,7 +39,7 @@ docker-compose up
 5) jenkins
 docker run - p 8080:8080 -p 50000:50000 -v /your/home:/var/jenkins_home jenkins
 
-6) Getlab
+6) Gitlab
 docker run --detach \
   --hostname gitlab.example.com \
   --publish 443:443 --publish 80:80 --publish 23:23 \
