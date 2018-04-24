@@ -37,8 +37,12 @@ docker-machine <command> -h
 docker-machine active [args...]
 docker-machine config [options] [arg...]
 docker-machine create [options] [arg...]
+docker-machine env/inspect/ip/kill/ls [options] [arg...]
 
-docker-machine create -d virtualbox \
+1) virtual 
+docker-machine create --driver=virtualbox vbox-instance
+
+docker-machine create --driver virtualbox \
   --engine-storage-driver overlay \
   --engine-label name=testmachine \
   --engine-label year=2018 \
@@ -47,4 +51,15 @@ docker-machine create -d virtualbox \
   --engine-insecure-registry registry.private.com \
   mydockermachine
 
-docker-machine env/inspect/ip/kill/ls [options] [arg...]
+2) local host
+docker-machine create --driver generic --generic-ip-address=192.168.0.110 --generic-ssh-user=jjp node110
+docker-machine create --driver generic --generic-ip-address=192.168.0.119 --generic-ssh-user=jjp node119
+
+3) cloud
+
+docker-machine create --driver amazonec2  \
+  --amazonec2-access-key AKI****************  \
+  --amazonec2-secrect-key 8T93c*************  \
+  --amazonec2-vpc-id vpc-********************  \
+  aws_instance
+  
