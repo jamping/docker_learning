@@ -89,7 +89,126 @@ $ docker service create \
 --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock \
 portainer/portainer \
 -H unix:///var/run/docker.sock \
---swarm
 
 访问 http://192.168.100.201:9000 设定 admin 后即可登录Portainer。
 pass:ptWbgsnmm1@#
+
+4) example
+
+目标：
+
+使用Docker Toolbox 创建4台Docker 虚拟机，组建Docker Swarm集群，其中2台为Docker Swarm集群的Manager角色，2台为Worker角色。在集群中安装Portainer图形化管理工具，通过Portainer进行集群的管理和使用。 
+
+步骤：
+
+1.创建4台Docker虚拟机，机器名为：（manager1/manager2，worker1/worker2)
+2.初始化Docker Swarm 集群（docker swarm init）
+3.管理者虚机节点的加入（manager）
+4.工作节点虚机的加入（worker）
+5.安装portainer容器
+6.通过Portainer在集群中部署httpd及其他应用
+ 
+
+命令：
+ 
+
+# 1.1在Docker Toolbox控制台中创建manager1虚拟机
+
+docker-machine create \
+  --driver virtualbox \
+  --engine-registry-mirror=https://registry.docker-cn.com \
+  manager1 
+
+#1.2 继续创建虚拟机manager2虚拟机
+
+docker-machine create \
+  --driver virtualbox \
+  --engine-registry-mirror=https://registry.docker-cn.com \
+  manager2 
+
+# 1.3创建虚拟机worker1
+
+docker-machine create \
+  --driver virtualbox \
+  --engine-registry-mirror=https://registry.docker-cn.com \
+  worker1 
+
+# 1.4创建虚拟机worker2
+
+docker-machine create \
+  --driver virtualbox \
+  --engine-registry-mirror=https://registry.docker-cn.com \
+  worker2 
+
+# 2.1切换到集群的主控节点manager1上，初始化Swarm集群
+
+eval $(docker-machine env manager1)
+docker swarm init --advertise-addr $(docker-machine ip manager1):2377
+
+#到此集群的主控节点创建成功。 
+
+# 2.2分别显示管理节点和工作节点加入集群的命令，其中包含令牌
+
+docker swarm join-token manager
+docker swarm join-token worker 
+
+#注意：管理节点加入集群的令牌和工作节点加入集群的令牌是不一样的。
+#在控制台上可以复制加入集群的命令，无需手工逐个输入，
+#还要注意在记事本中删除令牌行不必要的结尾的换行符，
+#这样执行加入集群的命令才不会出错。
+# 以下命令中的令牌是我的电脑实验时自动产生的，
+# 各位需要根据自己显示的令牌替换掉下面的令牌. 
+
+# 3切换到manager2虚拟机，执行加入到集群的命令
+
+eval $(docker-machine env manager2)
+docker swarm join \
+  --token SWMTKN-1-18foycvyym1btrks0xshjoh2a51kg1wkf90qlnd601op1owj9e-477vghk0mw93l7nklgt9mehgv \
+  $(docker-machine ip manager1):2377
+
+ 
+
+# 4.1切换到worker1虚拟机，执行加入到集群的命令，令牌不同，最终角色不同。
+
+eval $(docker-machine env worker1)
+docker swarm join \
+  --token SWMTKN-1-18foycvyym1btrks0xshjoh2a51kg1wkf90qlnd601op1owj9e-blqzz5y48jbd61j0ywzbgvkp9 \
+  $(docker-machine ip manager1):2377
+
+ 
+
+# 4.2切换到worker2虚拟机，执行加入到集群的命令，
+
+eval $(docker-machine env worker2)
+docker swarm join \
+  --token SWMTKN-1-18foycvyym1btrks0xshjoh2a51kg1wkf90qlnd601op1owj9e-blqzz5y48jbd61j0ywzbgvkp9 \
+  $(docker-machine ip manager1):2377 
+
+# 5.1在集群上运行 portainer，自动的运行在manager节点上
+
+docker service create \
+  --name portainer \
+  --publish 9000:9000 \
+  --constraint 'node.role == manager' \
+  --mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock \
+  portainer/portainer \
+  -H unix:///var/run/docker.sock
+
+# 因为要从网络上下载portainer/portainer 镜像，然后自动启动服务，
+# 需要稍等片刻（1分钟到几分钟），才能访问portainer管理页面。
+# 因此，创建虚拟机时加入镜像加速器地址是非常必要的，可以排除很多网络问题。
+# 访问Portainer的地址为 http://4台虚机的任何一个IP:9000 
+
+# 5.2继续在集群主控节点上部署可视化的visualizer服务
+# 可以非常直观的显示整个Swarm集群的信息、状态、运行的容器等
+
+docker service create \
+  --name=viz \
+  --publish=8088:8080/tcp \
+  --constraint=node.role==manager \
+  --mount=type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock \
+  manomarks/visualizer
+
+# 访问方法: http://4台机器的任何一个ip:8088 
+
+# 6 通过Portainer的管理界面，管理整个集群。
