@@ -41,14 +41,16 @@ docker run - p 8080:8080 -p 50000:50000 -v /your/home:/var/jenkins_home jenkins
 
 6) Gitlab
 docker run --detach \
-  --hostname gitlab.example.com \
-  --publish 443:443 --publish 80:80 --publish 23:23 \
+  --hostname gitlab.zzb.hj \
+  --publish 8443:443 --publish 8090:80 --publish 8023:23 \
   --name gitlab \
   --restart always \
   --volume /srv/gitlab/config:/etc/gitlab \
   --volume /srv/gitlab/logs:/var/log/gitlab \
   --volume /srv/gitlab/data:/var/opt/gitlab \
   gitlab/gitlab-ce
+
+user:root
 
 7) database
 docker run --name jjp-mysql -e MYSQL_ROOT_PASSWORD=wbgsnmm -d mysql
