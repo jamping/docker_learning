@@ -1,0 +1,17 @@
+1) PasS ( platform as s service)
+
+Deis http://deis.io, code:https://github.com/deis/deis
+
+based at docker and coreos
+
+2) Flynn
+
+http://flynn.io  code:https://github.com/flynn/flynn
+
+3) Drone (Continuous Integration)
+
+http://drone.io  code:https://github.com/drone/drone
+
+4) container management
+
+Portainer, Citadel, Shipyard, DockerUI, Panamax, Seagull, Dockerboard
