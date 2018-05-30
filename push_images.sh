@@ -5,7 +5,7 @@
 # Created: 2014.09-23
 
 # The registry server address where you want push the images into
-registry=harbor.zzb.hj/library
+registry=harbor.zzb.hj:9090/library
 
 ### Do not modify the following part, unless you know what it means ###
 ech0_r() {
