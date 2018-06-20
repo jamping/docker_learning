@@ -29,12 +29,27 @@ wordpress:
     - 8080:80
 
 db:
-  imgae: mariadb
+  image: mariadb
   environment:
     MYSQL_ROOT_PASSWORD:wbgsnmm
 
 and run:
 docker-compose up
+
+another methods:
+
+docker run --name mysqlwp -e MYSQL_ROOT_PASSWORD=wordpressdocker \
+                              -e MYSQL_DATABASE=wordpress \
+                              -e MYSQL_USER=wordpress \
+                              -e MYSQL_PASSWORD=wordpresspwd \
+                              -v /home/docker/mysql:/var/lib/mysql \
+                              -d mysql
+
+docker run --name wordpresstest --link mysqlwp:mysql -p 9090:80 \
+                                 -e WORDPRESS_DB_NAME=wordpress \
+                                 -e WORDPRESS_DB_USER=wordpress \
+                                 -e WORDPRESS_DB_PASSWORD=wordpresspwd \
+                                 -d wordpress
 
 5) jenkins
 docker run - p 8080:8080 -p 50000:50000 -v /your/home:/var/jenkins_home jenkins
